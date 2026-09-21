@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>
+html{color-scheme:light dark}
+:root{padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Panel de transformación estructural</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+:root{
+  --bg:#EDEFEA; --surface:#FBFCF9; --surface2:#E3E7DF;
+  --ink:#1A211C; --ink2:#4E5A52; --line:#C7CFC5;
+  --accent:#15585E; --accent-soft:rgba(21,88,94,.13);
+  --col:#A96A26; --col-soft:rgba(169,106,38,.15);
+  --warn:#96431F; --ok:#3B6B45;
+  --sans:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#111512; --surface:#191F1B; --surface2:#232A24;
+    --ink:#E6EAE3; --ink2:#9AA79E; --line:#2F3932;
+    --accent:#4FB0B6; --accent-soft:rgba(79,176,182,.17);
+    --col:#DBA055; --col-soft:rgba(219,160,85,.19);
+    --warn:#D5825C; --ok:#77B086;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111512; --surface:#191F1B; --surface2:#232A24;
+  --ink:#E6EAE3; --ink2:#9AA79E; --line:#2F3932;
+  --accent:#4FB0B6; --accent-soft:rgba(79,176,182,.17);
+  --col:#DBA055; --col-soft:rgba(219,160,85,.19);
+  --warn:#D5825C; --ok:#77B086;
+}
+
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--serif); font-size:16px; line-height:1.55; -webkit-text-size-adjust:100%}
+.wrap{max-width:680px; margin:0 auto; padding-inline:16px; padding-block:0 64px}
+
+.topbar{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; background:var(--bg); border-bottom:1px solid var(--line); margin-inline:-16px; padding-inline:16px; padding-block:10px 0}
+.brand{font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin:0 0 8px}
+.chips{display:flex; gap:6px; overflow-x:auto; padding-bottom:10px; scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto; font-family:var(--sans); font-weight:600; font-size:13px; padding:7px 12px; border-radius:2px; border:1px solid var(--line); background:var(--surface); color:var(--ink2); cursor:pointer; white-space:nowrap; transition:background .12s,color .12s,border-color .12s}
+.chip:hover{border-color:var(--accent); color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--bg)}
+.chip.is-col[aria-pressed="true"]{background:var(--col); border-color:var(--col)}
+.chip:focus-visible,button:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+h1{font-family:var(--sans); font-weight:700; font-size:27px; line-height:1.15; letter-spacing:-.015em; margin:26px 0 10px; text-wrap:balance}
+h2{font-family:var(--sans); font-weight:600; font-size:19px; line-height:1.25; margin:0 0 8px; text-wrap:balance}
+h3{font-family:var(--sans); font-weight:600; font-size:15px; margin:0 0 6px}
+p{margin:0 0 12px; max-width:62ch}
+.lead{font-size:17px; color:var(--ink2)}
+.note{font-family:var(--sans); font-size:12.5px; line-height:1.45; color:var(--ink2); margin:8px 0 0}
+.fuente{font-family:var(--sans); font-size:11.5px; line-height:1.45; color:var(--ink2); margin:6px 0 0}
+
+.step{border-top:1px solid var(--line); padding-block:22px 4px; margin-top:4px}
+.stepnum{font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.1em; color:var(--ink2); display:block; margin-bottom:4px}
+.panelbox{background:var(--surface); border:1px solid var(--line); padding:14px; margin:14px 0}
+.ask{font-family:var(--sans); font-weight:600; font-size:14.5px; color:var(--ink); border-left:3px solid var(--accent); padding-left:10px; margin:14px 0 10px}
+
+.figs{display:grid; grid-template-columns:repeat(auto-fit,minmax(142px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); margin:14px 0}
+.fig{background:var(--surface); padding:11px 12px}
+.fig .k{font-family:var(--mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); display:block; line-height:1.4}
+.fig .v{font-family:var(--mono); font-weight:600; font-size:21px; font-variant-numeric:tabular-nums; display:block; margin-top:3px; line-height:1.15; overflow-wrap:anywhere}
+.fig .v.sm{font-size:15px}
+.fig .s{font-family:var(--sans); font-size:11.5px; color:var(--ink2); display:block; line-height:1.35; margin-top:3px}
+.v.up{color:var(--ok)} .v.down{color:var(--warn)}
+
+figure{margin:0}
+.chart{width:100%; height:auto; display:block; background:var(--surface); border:1px solid var(--line)}
+.chart text{font-family:var(--mono); font-size:9px; fill:var(--ink2)}
+.chart text.nm{font-family:var(--sans); font-size:11.5px; font-weight:600; fill:var(--ink)}
+.chart line.grid{stroke:var(--line); stroke-width:1}
+.chart line.umb{stroke:var(--warn); stroke-width:1.4; stroke-dasharray:4 3}
+.legend{display:flex; flex-wrap:wrap; gap:6px 16px; font-family:var(--sans); font-size:12px; color:var(--ink2); margin-top:8px}
+.legend i{display:inline-block; width:14px; height:3px; vertical-align:middle; margin-right:6px}
+figcaption{font-family:var(--sans); font-size:12px; color:var(--ink2); margin-top:8px; line-height:1.45}
+
+.cadena{margin:16px 0 4px}
+.cadena .c{background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--accent); padding:9px 12px; font-family:var(--sans); font-size:13.5px; line-height:1.4}
+.cadena .c + .c{margin-top:20px; position:relative}
+.cadena .c + .c::before{content:"\2193"; position:absolute; top:-18px; left:14px; color:var(--accent); font-size:15px; line-height:1; font-family:var(--sans)}
+.cadena .vuelta{margin-top:8px; font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--warn)}
+
+.scroll{overflow-x:auto; border:1px solid var(--line); background:var(--surface); margin:14px 0}
+table{border-collapse:collapse; width:100%; min-width:700px; font-family:var(--mono); font-size:12.5px; font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap}
+th{font-weight:600; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink2); vertical-align:bottom}
+th:first-child,td:first-child{text-align:left; font-family:var(--sans); font-weight:600; font-size:13px}
+tbody tr:last-child td{border-bottom:none}
+tr.is-col td{background:var(--col-soft)}
+#tabla td:last-child{white-space:normal; min-width:230px; font-family:var(--serif); font-size:13.5px}
+
+.opts{display:flex; flex-direction:column; gap:6px; margin:0 0 4px}
+.opt{display:flex; align-items:flex-start; gap:9px; padding:9px 11px; border:1px solid var(--line); background:var(--surface); cursor:pointer; font-family:var(--sans); font-size:14px; line-height:1.4}
+.opt:has(input:checked){border-color:var(--accent); background:var(--accent-soft)}
+.opt input{margin:3px 0 0; accent-color:var(--accent); flex:0 0 auto}
+textarea{width:100%; min-height:74px; padding:10px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-family:var(--serif); font-size:15px; line-height:1.5; resize:vertical; border-radius:0}
+.readout{border:1px solid var(--accent); background:var(--accent-soft); padding:14px; margin-top:14px}
+.readout p{font-size:16.5px; margin:0; max-width:none}
+.readout .rl{font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin:0 0 6px}
+
+.envio{border:1px solid var(--accent); background:var(--surface); padding:14px; margin-top:14px}
+.envio label{display:block; font-family:var(--sans); font-weight:600; font-size:13.5px; margin-bottom:6px}
+.envio input{width:100%; padding:10px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font-family:var(--serif); font-size:15px; border-radius:0}
+.btn{margin-top:10px; font-family:var(--sans); font-weight:600; font-size:14px; padding:10px 16px; border:1px solid var(--accent); background:var(--accent); color:var(--bg); cursor:pointer; border-radius:2px}
+.btn:disabled{opacity:.5; cursor:default}
+.estado{font-family:var(--sans); font-size:12.5px; line-height:1.45; color:var(--ink2); margin:8px 0 0; min-height:1.3em}
+.estado.ok{color:var(--ok)} .estado.err{color:var(--warn)}
+.vacio{font-family:var(--sans); font-size:13px; color:var(--ink2); border:1px dashed var(--line); padding:18px; text-align:center; margin:14px 0}
+
+.assign{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); margin:14px 0}
+.assign div{background:var(--surface); padding:10px 12px}
+.assign .p{font-family:var(--sans); font-weight:600; font-size:14px; display:block}
+.assign .q{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink2); display:block; margin-top:2px}
+
+.sources{border-top:1px solid var(--line); margin-top:32px; padding-top:18px}
+.sources p,.sources li{font-family:var(--sans); font-size:12.5px; line-height:1.5; color:var(--ink2)}
+.sources ul{padding-left:18px; margin:0 0 12px}
+.sources li{margin-bottom:6px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <p class="brand">Desarrollo Rural 5001462 · Sesión 4 · Taller</p>
+    <div class="chips" id="chips" aria-label="Navegación del panel"></div>
+  </div>
+
+  <main id="view"></main>
+
+  <section class="sources">
+    <h3>Fuentes</h3>
+    <ul>
+      <li>Banco Mundial. Indicadores del Desarrollo Mundial. Series NV.AGR.TOTL.ZS, SL.AGR.EMPL.ZS, NY.GDP.PCAP.PP.KD, NV.AGR.EMPL.KD, TX.VAL.MANF.ZS.UN, TX.VAL.FOOD.ZS.UN, TX.VAL.AGRI.ZS.UN, TX.VAL.FUEL.ZS.UN, TX.VAL.MMTL.ZS.UN, DT.TDS.DECT.EX.ZS y SP.RUR.TOTL.ZS. Consulta del 20 de septiembre de 2026.</li>
+      <li>Banco Mundial (2007). <em>Informe sobre el desarrollo mundial 2008. Agricultura para el desarrollo</em>. Capítulo 1, «Los tres mundos de la agricultura para el desarrollo», p. 23, y recuadro 1.3, p. 26.</li>
+      <li>Banco Mundial (2024). <em>Informe sobre el desarrollo mundial 2024. La trampa del ingreso mediano</em>. Panorama general, pp. 1 y 2.</li>
+      <li>Banco Mundial (2024). <em>International Debt Report 2024</em>. Comunicado del 3 de diciembre de 2024.</li>
+      <li>UNCTAD (2025). <em>Debt crisis. Developing countries' external debt hits record $11.4 trillion</em>. Nota del 17 de marzo de 2025.</li>
+      <li>UNCTAD (2025). <em>The State of Commodity Dependence 2025</em>.</li>
+      <li>PNUD (2024). <em>Informe sobre Desarrollo Humano 2023/2024</em>. Comunicado del 12 de marzo de 2024.</li>
+      <li>Andrews, M., Pritchett, L. y Woolcock, M. (2013). Escaping Capability Traps Through Problem Driven Iterative Adaptation. <em>World Development</em>, 51, 234-244.</li>
+    </ul>
+    <p>Las series del Banco Mundial presentan rupturas metodológicas. En Colombia, el cambio de base de las cuentas nacionales altera el nivel de la serie de participación de la agricultura en el PIB entre 1999 y 2000. La comparación entre países se hace sobre tendencias y no sobre niveles exactos.</p>
+  </section>
+
+</div>
+
+<script>
+/* =======================================================================
+   CONFIGURACIÓN DE ENVÍO A GOOGLE SHEETS
+   Pegue entre las comillas la dirección de la aplicación web de Apps Script.
+   Deje la cadena vacía para trabajar sin hoja de cálculo.
+   ======================================================================= */
+var URL_HOJA  = "https://script.google.com/macros/s/AKfycbxh5_6kAT837GPsjgeRCB_zpQde7t4JongeX47M9hT-bHzZqk6aid1a45q8JOz2jnsP/exec";
+var CURSO     = "5001462";
+var SESION    = "4";
+var ACTIVIDAD = "transformacion-estructural";
+/* ===================================================================== */
+
+var ANIOS = [1991,1995,2000,2005,2010,2015,2020,2023,2024];
+var EEUU  = [43748,47227,55046,59612,59797,64368,67407,74352,75698];
+var ANIOS3 = [2000,2010,2024];
+
+var PAISES = {
+  BRA:{nombre:"Brasil", agri:[6.84,5.01,4.75,4.65,4.12,4.32,5.71,6.02,5.75], empleo:[16.10,15.71,14.21,14.33,10.52,9.33,9.31,8.20,7.72], pib:[12547,13550,14005,15221,18062,18357,17328,19080,19652], manuf:[57.55,34.96,23.22], vat:[4362,7112,12735], rural:12.10, deuda:[86.7,18.4,26.7], prim:{ali:40.35,agr:5.65,com:16.96,min:12.64},
+    informe:"El informe de 2008 señala que todos los estados de Brasil califican como urbanizados (recuadro 1.3, p. 26)."},
+  CHN:{nombre:"China", agri:[23.96,19.50,14.53,11.48,9.17,8.22,7.54,6.89,6.80], empleo:[59.64,52.20,50.04,44.80,36.70,28.30,23.60,22.80,22.22], pib:[1798,2808,4066,6298,10476,14857,19215,22687,23841], manuf:[88.23,93.59,91.16], vat:[1492,2802,8100], rural:34.11, deuda:[13.1,2.9,8.6], prim:{ali:2.43,agr:0.34,com:1.50,min:1.51},
+    informe:"El informe de 2008 señala que todas las provincias de China, salvo Hainan, están en transformación (recuadro 1.3, p. 26)."},
+  IND:{nombre:"India", agri:[27.66,24.46,21.61,17.62,17.03,16.17,18.67,17.66,17.57], empleo:[63.13,61.97,59.61,55.02,51.06,44.28,44.68,43.51,42.35], pib:[2116,2469,3010,3770,4914,6302,7187,8871,9416], manuf:[77.73,62.62,67.10], vat:[994,1348,2102], rural:64.62, deuda:[17.1,6.8,10.5], prim:{ali:11.13,agr:0.90,com:17.09,min:3.69},
+    informe:"El informe de 2008 describe a India como «en conjunto un país en transformación», con estados agrícolas y estados urbanizados (recuadro 1.3, p. 26)."},
+  KOR:{nombre:"Corea del Sur", agri:[6.61,5.14,3.71,2.51,2.04,1.90,1.58,1.45,1.46], empleo:[15.48,11.18,10.44,7.48,6.19,5.11,5.37,5.32,5.20], pib:[15784,20698,26404,32886,39574,44849,49374,54029,55071], manuf:[89.94,88.29,87.29], vat:[10503,18156,17998], rural:18.83, deuda:null, prim:{ali:1.63,agr:0.80,com:7.70,min:2.40},
+    informe:"El panorama general del informe de 2008 no clasifica a este país. En 2007 ya era una economía de ingreso alto y quedaba fuera de los tres mundos."},
+  MEX:{nombre:"México", agri:[6.50,4.13,3.16,2.95,3.09,3.09,3.71,3.85,3.87], empleo:[25.95,23.55,17.52,15.26,14.45,13.78,13.12,11.96,11.61], pib:[17512,17028,20470,20277,20058,21409,19728,21865,21970], manuf:[83.50,74.54,79.02], vat:[4266,5068,6201], rural:20.25, deuda:[31.9,9.6,9.5], prim:{ali:8.53,agr:0.14,com:4.49,min:2.07},
+    informe:"El informe de 2008 describe a México como «un país en general urbanizado», con algunos estados en transformación y dos agrícolas (recuadro 1.3, p. 26)."},
+  MWI:{nombre:"Malaui", agri:[32.98,22.34,29.66,27.38,24.63,22.99,25.02,28.87,31.79], empleo:[72.95,72.07,71.13,70.66,67.07,65.34,64.92,65.30,65.24], pib:[1104,1141,1239,1215,1504,1598,1656,1649,1634], manuf:[7.45,8.24,8.05], vat:[468,482,502], rural:82.73, deuda:[13.5,1.7,10.6], prim:{ali:90.18,agr:0.92,com:0.00,min:0.85},
+    informe:"El panorama general del informe de 2008 no nombra a este país. Ubica en el mundo agrícola a la mayor parte de África subsahariana (p. 23)."},
+  COL:{nombre:"Colombia", agri:[17.45,14.02,8.31,7.53,6.32,5.98,7.51,8.80,9.50], empleo:[19.94,19.04,19.86,19.40,17.51,15.39,15.81,14.40,14.25], pib:[9996,11279,10813,11999,14037,16821,15862,18407,18482], manuf:[32.46,21.31,21.38], vat:[4227,4298,6549], rural:21.48, deuda:[30.6,20.1,43.0], prim:{ali:18.09,agr:5.09,com:45.30,min:1.84},
+    informe:"El panorama general del informe de 2008 no nombra al país. Ubica en el mundo urbanizado a la mayor parte de América Latina (p. 23)."}
+};
+
+var ORDEN = ["BRA","CHN","IND","KOR","MEX","MWI","COL"];
+var UMBRAL_PRIM = 60;
+
+function n1(x){return x.toFixed(1).replace(".",",");}
+function n0(x){return Math.round(x).toLocaleString("es-CO");}
+function ratioEEUU(c,i){return PAISES[c].pib[i]/EEUU[i]*100;}
+function primTotal(c){var p=PAISES[c].prim; return p.ali+p.agr+p.com+p.min;}
+function mundo(c){
+  var e=PAISES[c].empleo[8], r=PAISES[c].rural;
+  if(e>=50 && r>=50) return "agrícola";
+  if(e>=20) return "en transformación";
+  return "urbanizado";
+}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+/* ---------- gráficas ---------- */
+function escala(bruto){
+  var pasos=[1,2,5,10,20,25,50,100,200];
+  for(var i=0;i<pasos.length;i++){ var p=pasos[i], n=Math.ceil(bruto/p); if(n<=5) return {paso:p,max:n*p,n:n}; }
+  return {paso:200,max:1000,n:5};
+}
+
+function lineas(series, opts){
+  opts=opts||{};
+  var W=360,H=214,L=36,R=12,T=14,B=26, bruto=0;
+  series.forEach(function(s){s.datos.forEach(function(v){if(v>bruto)bruto=v;});});
+  var e=escala(bruto||1);
+  var x=function(i){return L+(W-L-R)*i/(ANIOS.length-1);};
+  var y=function(v){return T+(H-T-B)*(1-v/e.max);};
+  var o='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(opts.alt||"Gráfica de líneas")+'">';
+  for(var g=0;g<=e.n;g++){
+    var val=e.paso*g, yy=y(val);
+    o+='<line class="grid" x1="'+L+'" y1="'+yy.toFixed(1)+'" x2="'+(W-R)+'" y2="'+yy.toFixed(1)+'"/>';
+    o+='<text x="'+(L-6)+'" y="'+(yy+3.4).toFixed(1)+'" text-anchor="end">'+(e.paso>=5?n0(val):n1(val))+'</text>';
+  }
+  [0,4,8].forEach(function(i){
+    o+='<text x="'+x(i).toFixed(1)+'" y="'+(H-8)+'" text-anchor="'+(i===0?"start":i===8?"end":"middle")+'">'+ANIOS[i]+'</text>';
+  });
+  if(opts.area && series.length>=2){
+    var p="";
+    for(var i=0;i<ANIOS.length;i++) p+=(i?"L":"M")+x(i).toFixed(1)+" "+y(series[0].datos[i]).toFixed(1)+" ";
+    for(var j=ANIOS.length-1;j>=0;j--) p+="L"+x(j).toFixed(1)+" "+y(series[1].datos[j]).toFixed(1)+" ";
+    o+='<path d="'+p+'Z" style="fill:var(--accent-soft)" stroke="none"/>';
+  }
+  series.forEach(function(s){
+    var d="";
+    for(var i=0;i<ANIOS.length;i++) d+=(i?"L":"M")+x(i).toFixed(1)+" "+y(s.datos[i]).toFixed(1)+" ";
+    o+='<path d="'+d+'" fill="none" style="stroke:'+s.color+'" stroke-width="'+(s.punteada?1.6:2.3)+'" stroke-linejoin="round" stroke-linecap="round"'+(s.punteada?' stroke-dasharray="4 3"':'')+'/>';
+    o+='<circle cx="'+x(ANIOS.length-1).toFixed(1)+'" cy="'+y(s.datos[8]).toFixed(1)+'" r="3.2" style="fill:'+s.color+'"/>';
+  });
+  return o+'</svg>';
+}
+
+function barras(pares, opts){
+  opts=opts||{};
+  var W=360, alto=30, H=pares.length*alto+20, L=112, R=52, max=0;
+  pares.forEach(function(p){if(p.valor>max)max=p.valor;});
+  if(opts.umbral && opts.umbral>max) max=opts.umbral;
+  if(max<=0)max=1;
+  var esc_=function(v){return (W-L-R)*v/max;};
+  var o='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(opts.alt||"Gráfica de barras")+'">';
+  pares.forEach(function(p,i){
+    var yy=8+i*alto, w=Math.max(esc_(p.valor),2);
+    o+='<text class="nm" x="'+(L-8)+'" y="'+(yy+15)+'" text-anchor="end">'+esc(p.nombre)+'</text>';
+    o+='<rect x="'+L+'" y="'+(yy+3)+'" width="'+w.toFixed(1)+'" height="16" style="fill:'+p.color+'"/>';
+    o+='<text x="'+(L+w+6).toFixed(1)+'" y="'+(yy+15)+'">'+esc(p.etiqueta)+'</text>';
+  });
+  if(opts.umbral){
+    var xu=L+esc_(opts.umbral);
+    o+='<line class="umb" x1="'+xu.toFixed(1)+'" y1="4" x2="'+xu.toFixed(1)+'" y2="'+(H-14)+'"/>';
+    o+='<text x="'+xu.toFixed(1)+'" y="'+(H-4)+'" text-anchor="middle" style="fill:var(--warn)">'+esc(opts.umbralTexto||"umbral")+'</text>';
+  }
+  return o+'</svg>';
+}
+
+function cadena(pasos){
+  return '<div class="cadena">'+pasos.map(function(t){return '<div class="c">'+t+'</div>';}).join("")+
+    '<p class="vuelta">Y el ciclo vuelve a empezar</p></div>';
+}
+
+/* ---------- vistas ---------- */
+function vistaInicio(){
+  var asign=ORDEN.filter(function(c){return c!=="COL";}).map(function(c,i){
+    return '<div><span class="p">'+PAISES[c].nombre+'</span><span class="q">Estudiante '+(i+1)+'</span></div>';
+  }).join("");
+  var ls=ORDEN.map(function(c){
+    return {datos:ANIOS.map(function(_,i){return ratioEEUU(c,i);}), color:(c==="COL"?"var(--col)":"var(--accent)"), punteada:(c!=="COL")};
+  });
+  return '<h1>Trayectorias de la transformación estructural</h1>'+
+  '<p class="lead">Siete países, siete trayectorias. Cada estudiante reconstruye la de un país con datos del Banco Mundial, lo ubica en los tres mundos de la agricultura y decide si el país se acercó o se estancó. Después, con todo el grupo, se revisan cuatro trampas del desarrollo y cada quien dice en cuál está su país.</p>'+
+  '<div class="panelbox"><h3>Asignación de países</h3><div class="assign">'+asign+'</div>'+
+  '<p class="note">Toque el nombre de su país en la barra superior y recorra los cuatro pasos. No hay que anotar nada en papel. El cierre arma el texto que usted lee en voz alta ante el grupo.</p></div>'+
+  '<h2>Ingreso por habitante frente a Estados Unidos</h2>'+
+  '<figure>'+lineas(ls,{alt:"Ingreso por habitante de los siete países como porcentaje del de Estados Unidos entre 1991 y 2024"})+
+  '<div class="legend"><span><i style="background:var(--col)"></i>Colombia</span><span><i style="background:var(--accent)"></i>Los otros seis países</span></div>'+
+  '<figcaption>Ingreso por habitante en paridad de poder adquisitivo, dólares constantes de 2021, como porcentaje del de Estados Unidos. Cálculo propio sobre la serie NY.GDP.PCAP.PP.KD del Banco Mundial.</figcaption></figure>'+
+  '<p class="note">Una línea que sube indica que el país recorta distancia frente al país de frontera. Una línea plana durante treinta años es la forma que toma una trampa en los datos.</p>';
+}
+
+function vistaPais(cod){
+  var P=PAISES[cod], esCol=(cod==="COL"), color=esCol?"var(--col)":"var(--accent)";
+  var dAgri=P.agri[0]-P.agri[8], dEmp=P.empleo[0]-P.empleo[8];
+  var brecha=P.empleo[8]/P.agri[8];
+  var r91=ratioEEUU(cod,0), r24=ratioEEUU(cod,8), dif=r24-r91;
+  var clase=dif>3?"up":dif<-3?"down":"";
+  var verbo=dif>3?"Se acercó":dif<-3?"Se alejó":"Se mantuvo";
+  var m=mundo(cod);
+  var crece=(P.vat[2]/P.vat[0]-1)*100, creceCol=(PAISES.COL.vat[2]/PAISES.COL.vat[0]-1)*100;
+  var pt=primTotal(cod);
+
+  var o='<h1>'+P.nombre+'</h1><p class="lead">'+(esCol
+    ? 'El caso que se examina en todas las sesiones. Los mismos cuatro pasos y, al final, la lista de trampas aplicada al agro colombiano.'
+    : 'Recorra los cuatro pasos en orden. Cada paso trae una pregunta que se responde con el dato que tiene enfrente.')+'</p>';
+
+  o+='<section class="step"><span class="stepnum">Paso 01</span><h2>Trayectoria de la agricultura</h2>'+
+    '<p>Dos líneas. Arriba, el porcentaje de los trabajadores del país que están en la agricultura. Abajo, el porcentaje del producto interno bruto que aporta la agricultura. La franja entre ambas es la brecha de productividad.</p>'+
+    '<figure>'+lineas([{datos:P.empleo,color:color},{datos:P.agri,color:color,punteada:true}],
+      {area:true, alt:"Empleo agrícola y participación de la agricultura en el PIB de "+P.nombre})+
+    '<div class="legend"><span><i style="background:'+color+'"></i>Empleo agrícola, % del empleo total</span><span><i style="background:'+color+';opacity:.5"></i>Agricultura, % del PIB</span></div>'+
+    '<figcaption>Series SL.AGR.EMPL.ZS y NV.AGR.TOTL.ZS, Banco Mundial.</figcaption></figure>'+
+    '<div class="figs">'+
+      '<div class="fig"><span class="k">Empleo agrícola 2024</span><span class="v">'+n1(P.empleo[8])+' %</span><span class="s">'+(dEmp>=0?"Bajó":"Subió")+' '+n1(Math.abs(dEmp))+' puntos desde 1991</span></div>'+
+      '<div class="fig"><span class="k">Agricultura en el PIB 2024</span><span class="v">'+n1(P.agri[8])+' %</span><span class="s">'+(dAgri>=0?"Bajó":"Subió")+' '+n1(Math.abs(dAgri))+' puntos desde 1991</span></div>'+
+      '<div class="fig"><span class="k">Población rural 2024</span><span class="v">'+n1(P.rural)+' %</span><span class="s">Serie SP.RUR.TOTL.ZS</span></div>'+
+    '</div>'+
+    '<p class="ask">¿Las dos líneas bajaron al mismo tiempo, o una bajó mucho más rápido que la otra?</p></section>';
+
+  var pares=[{nombre:P.nombre, valor:P.vat[2], etiqueta:n0(P.vat[2]), color:color}];
+  if(!esCol) pares.push({nombre:"Colombia", valor:PAISES.COL.vat[2], etiqueta:n0(PAISES.COL.vat[2]), color:"var(--col)"});
+  if(cod!=="KOR") pares.push({nombre:"Corea del Sur", valor:PAISES.KOR.vat[2], etiqueta:n0(PAISES.KOR.vat[2]), color:"var(--line)"});
+  if(cod!=="MWI") pares.push({nombre:"Malaui", valor:PAISES.MWI.vat[2], etiqueta:n0(PAISES.MWI.vat[2]), color:"var(--line)"});
+
+  o+='<section class="step"><span class="stepnum">Paso 02</span><h2>Brecha de productividad</h2>'+
+    '<p>Si '+n1(P.empleo[8])+' de cada 100 trabajadores producen el '+n1(P.agri[8])+' % del producto, cada trabajador agrícola produce menos que el promedio del país. Esa distancia es lo que el informe de 2008 llama la brecha entre la agricultura y el resto de la economía.</p>'+
+    '<div class="figs">'+
+      '<div class="fig"><span class="k">Puntos de empleo por punto de PIB</span><span class="v">'+n1(brecha)+'</span><span class="s">Cuanto más alto, mayor la brecha. Cálculo propio.</span></div>'+
+      '<div class="fig"><span class="k">Valor agregado por trabajador agrícola</span><span class="v">'+n0(P.vat[2])+'</span><span class="s">Dólares constantes de 2015, año 2024. Serie NV.AGR.EMPL.KD.</span></div>'+
+      '<div class="fig"><span class="k">Variación desde 2000</span><span class="v '+(crece>=0?"up":"down")+'">'+(crece>=0?"+":"−")+n0(Math.abs(crece))+' %</span><span class="s">'+(esCol?"Medido en dólares constantes.":"En Colombia, +"+n0(creceCol)+" % en el mismo período.")+'</span></div>'+
+    '</div>'+
+    '<figure>'+barras(pares,{alt:"Valor agregado por trabajador agrícola en 2024, en dólares constantes de 2015"})+
+    '<figcaption>Valor agregado agrícola por trabajador, dólares constantes de 2015, año 2024. Serie NV.AGR.EMPL.KD, Banco Mundial.</figcaption></figure>'+
+    '<p class="ask">¿La brecha se cerró o se ensanchó entre 1991 y 2024?</p></section>';
+
+  var sr=[{datos:ANIOS.map(function(_,i){return ratioEEUU(cod,i);}), color:color}];
+  if(!esCol) sr.push({datos:ANIOS.map(function(_,i){return ratioEEUU("COL",i);}), color:"var(--col)", punteada:true});
+  o+='<section class="step"><span class="stepnum">Paso 03</span><h2>Posición frente al país de frontera</h2>'+
+    '<p>El informe de 2024 mide el avance de un país en relación con el ingreso por habitante de Estados Unidos, al que llama el país de frontera económica. La pregunta no es si el país creció, sino si recortó distancia.</p>'+
+    '<figure>'+lineas(sr,{alt:"Ingreso por habitante de "+P.nombre+" como porcentaje del de Estados Unidos"})+
+    '<div class="legend"><span><i style="background:'+color+'"></i>'+P.nombre+'</span>'+(esCol?"":'<span><i style="background:var(--col)"></i>Colombia</span>')+'</div>'+
+    '<figcaption>Ingreso por habitante en paridad de poder adquisitivo como porcentaje del de Estados Unidos. Cálculo propio sobre la serie NY.GDP.PCAP.PP.KD.</figcaption></figure>'+
+    '<div class="figs">'+
+      '<div class="fig"><span class="k">1991</span><span class="v">'+n1(r91)+' %</span><span class="s">del ingreso de Estados Unidos</span></div>'+
+      '<div class="fig"><span class="k">2024</span><span class="v">'+n1(r24)+' %</span><span class="s">del ingreso de Estados Unidos</span></div>'+
+      '<div class="fig"><span class="k">Resultado de 33 años</span><span class="v '+clase+'">'+(dif>=0?"+":"−")+n1(Math.abs(dif))+'</span><span class="s">puntos. '+verbo+'.</span></div>'+
+    '</div>'+
+    '<p class="ask">¿Qué ocurrió primero en este país, la caída del empleo agrícola o el acercamiento al país de frontera?</p></section>';
+
+  o+='<section class="step"><span class="stepnum">Paso 04</span><h2>Clasificación en los tres mundos</h2>'+
+    '<p>El informe de 2008 divide a los países en tres mundos según el aporte de la agricultura al crecimiento y según dónde se concentra la pobreza. Esos dos datos no están en el panel, de modo que el taller usa una regla operativa más simple, construida con el empleo agrícola y la población rural.</p>'+
+    '<div class="panelbox"><h3>Regla operativa del taller</h3>'+
+    '<p class="note">Mundo agrícola: empleo agrícola de 50 % o más y población rural de 50 % o más. Mundo en transformación: empleo agrícola entre 20 % y 50 %. Mundo urbanizado: empleo agrícola por debajo de 20 %.</p></div>'+
+    '<div class="figs"><div class="fig"><span class="k">Resultado de la regla</span><span class="v sm">Mundo '+m+'</span><span class="s">Empleo agrícola '+n1(P.empleo[8])+' %, población rural '+n1(P.rural)+' %</span></div></div>'+
+    '<p class="note">'+P.informe+'</p>'+
+    '<p class="ask">¿Qué se pierde al reemplazar el criterio del informe por esta regla más simple?</p></section>';
+
+  o+='<section class="step"><span class="stepnum">Datos para el bloque de trampas</span><h2>Deuda y exportaciones</h2>'+
+    '<p>Estas dos cifras no se usan en los cuatro pasos. Se necesitan más adelante, cuando el grupo revise las cuatro trampas del desarrollo.</p>'+
+    '<div class="figs">'+
+      '<div class="fig"><span class="k">Servicio de la deuda externa</span><span class="v">'+(P.deuda?n1(P.deuda[2])+' %':'sin dato')+'</span><span class="s">'+(P.deuda
+        ? 'de las exportaciones de bienes, servicios e ingreso primario, 2024. Era '+n1(P.deuda[0])+' % en 2000. Serie DT.TDS.DECT.EX.ZS.'
+        : 'El sistema de notificación de la deuda del Banco Mundial cubre países de ingreso bajo y mediano. Este país ya no reporta.')+'</span></div>'+
+      '<div class="fig"><span class="k">Exportaciones primarias</span><span class="v">'+n1(pt)+' %</span><span class="s">de las exportaciones de mercancías, 2024. Alimentos '+n1(P.prim.ali)+', materias primas agrícolas '+n1(P.prim.agr)+', combustibles '+n1(P.prim.com)+', minerales y metales '+n1(P.prim.min)+'.</span></div>'+
+    '</div></section>';
+
+  o+='<section class="step"><span class="stepnum">Cierre</span><h2>Veredicto</h2>'+
+    '<p>Marque las opciones y escriba una frase. El texto de abajo se arma solo y es lo que usted lee en voz alta. La última pregunta se responde después del bloque común de trampas.</p>'+
+    formulario(m,verbo,esCol)+
+    '<div class="readout"><p class="rl">Texto para leer en voz alta</p><p id="salida"></p></div>'+
+    bloqueEnvio()+'</section>';
+
+  if(esCol) o+=bloqueColombia();
+  return o;
+}
+
+function bloqueEnvio(){
+  if(!URL_HOJA) return '<p class="note">Las respuestas quedan guardadas en este celular. Léalas en voz alta ante el grupo.</p>';
+  return '<div class="envio">'+
+    '<label for="nombre">Nombre</label>'+
+    '<input type="text" id="nombre" autocomplete="name" placeholder="Escriba su nombre">'+
+    '<button type="button" class="btn" id="btnEnviar">Enviar respuestas</button>'+
+    '<p class="estado" id="estadoEnvio"></p>'+
+    '</div>';
+}
+
+function formulario(m,verbo,esCol){
+  var o='<p class="ask">Ubicación en los tres mundos</p><div class="opts">';
+  ["agrícola","en transformación","urbanizado"].forEach(function(v,i){
+    o+='<label class="opt"><input type="radio" name="v1" id="v1_'+i+'" value="'+v+'"'+(v===m?" checked":"")+'><span>Mundo '+v+'</span></label>';
+  });
+  o+='</div><p class="ask">Distancia frente al país de frontera</p><div class="opts">';
+  [["Se acercó","se acercó a Estados Unidos"],["Se mantuvo","se mantuvo a la misma distancia de Estados Unidos"],["Se alejó","se alejó de Estados Unidos"]].forEach(function(par,i){
+    o+='<label class="opt"><input type="radio" name="v2" id="v2_'+i+'" value="'+par[1]+'"'+(par[0]===verbo?" checked":"")+'><span>'+par[0]+'</span></label>';
+  });
+  o+='</div><p class="ask">'+(esCol?"El indicador más crítico del país":"El indicador que más lo separa de Colombia")+'</p><div class="opts">';
+  [["el empleo agrícola","Empleo agrícola"],["la productividad por trabajador agrícola","Productividad por trabajador"],["el peso de las manufacturas en las exportaciones","Manufacturas en las exportaciones"],["el ingreso por habitante","Ingreso por habitante"]].forEach(function(par,i){
+    o+='<label class="opt"><input type="radio" name="v3" id="v3_'+i+'" value="'+par[0]+'"'+(i===0?" checked":"")+'><span>'+par[1]+'</span></label>';
+  });
+  o+='</div><p class="ask">En una frase, qué explica esa diferencia</p><textarea id="v4" placeholder="Escriba aquí su frase."></textarea>';
+  o+='<p class="ask">La trampa en la que está su país</p><div class="opts">';
+  [["la trampa del ingreso mediano","Ingreso mediano"],["la trampa de la deuda","Deuda"],["la trampa de la dependencia de commodities","Dependencia de commodities"],["la trampa de la capacidad institucional","Capacidad institucional"],["ninguna de las cuatro","Ninguna de las cuatro"]].forEach(function(par,i){
+    o+='<label class="opt"><input type="radio" name="v5" id="v5_'+i+'" value="'+par[0]+'"><span>'+par[1]+'</span></label>';
+  });
+  return o+'</div>';
+}
+
+function bloqueColombia(){
+  var C=PAISES.COL;
+  return '<section class="step"><span class="stepnum">Cierre común</span><h2>Lista de trampas aplicada al agro colombiano</h2>'+
+  '<p>Estas son las cifras colombianas que el grupo discute frente a las cuatro trampas.</p>'+
+  '<div class="figs">'+
+    '<div class="fig"><span class="k">Manufacturas en las exportaciones</span><span class="v">'+n1(C.manuf[2])+' %</span><span class="s">Era '+n1(C.manuf[0])+' % en 2000. Serie TX.VAL.MANF.ZS.UN.</span></div>'+
+    '<div class="fig"><span class="k">Exportaciones primarias</span><span class="v">'+n1(primTotal("COL"))+' %</span><span class="s">Por encima del umbral de 60 % que usa la UNCTAD.</span></div>'+
+    '<div class="fig"><span class="k">Servicio de la deuda externa</span><span class="v">'+n1(C.deuda[2])+' %</span><span class="s">de las exportaciones, 2024. Era '+n1(C.deuda[1])+' % en 2010.</span></div>'+
+    '<div class="fig"><span class="k">Productividad agrícola desde 2000</span><span class="v">+'+n0((C.vat[2]/C.vat[0]-1)*100)+' %</span><span class="s">China creció +'+n0((PAISES.CHN.vat[2]/PAISES.CHN.vat[0]-1)*100)+' % en el mismo período.</span></div>'+
+    '<div class="fig"><span class="k">Distancia frente a Estados Unidos</span><span class="v sm">'+n1(ratioEEUU("COL",0))+' % → '+n1(ratioEEUU("COL",8))+' %</span><span class="s">Entre 1991 y 2024.</span></div>'+
+  '</div>'+
+  '<p class="ask">Con estas cifras sobre la mesa, ¿el problema del agro colombiano es que la agricultura pese poco, o que la agricultura y el resto de la economía se hayan quedado quietas al mismo tiempo?</p></section>';
+}
+
+/* ---------- bloque común de trampas ---------- */
+function vistaTrampas(){
+  var o='<h1>Cuatro trampas del desarrollo</h1>'+
+  '<p class="lead">Una trampa no es un problema aislado. Es un ciclo en el que un problema alimenta al siguiente y produce un equilibrio difícil de romper. Estas cuatro se cruzan entre sí. Cada estudiante decide al final en cuál está su país y lo sostiene con una cifra.</p>';
+
+  /* 1 */
+  o+='<section class="step"><span class="stepnum">Trampa 01</span><h2>Ingreso mediano</h2>'+
+    cadena([
+      "El país sube de ingreso bajo a ingreso mediano apostando a la inversión",
+      "La inversión sola rinde cada vez menos y no se incorpora tecnología del exterior",
+      "La productividad se estanca",
+      "El ingreso por habitante deja de acercarse al del país de frontera",
+      "Se responde con más inversión, que es lo único que el país sabe hacer"
+    ])+
+    '<div class="figs">'+
+      '<div class="fig"><span class="k">Economías de ingreso mediano</span><span class="v">108</span><span class="s">Con ingreso por habitante entre 1.136 y 13.845 dólares.</span></div>'+
+      '<div class="fig"><span class="k">Pasaron a ingreso alto desde 1990</span><span class="v">34</span><span class="s">Su población conjunta es menor a 250 millones de personas, el equivalente a la población de Pakistán.</span></div>'+
+    '</div>'+
+    '<p class="fuente">Banco Mundial (2024). Informe sobre el desarrollo mundial 2024. La trampa del ingreso mediano. Panorama general, pp. 1 y 2. El informe propone dos transiciones sucesivas, primero sumar incorporación de tecnología a la inversión y después sumar innovación propia.</p>'+
+    '<p class="ask">Mire la gráfica de inicio. ¿Cuáles de los siete países se están acercando al país de frontera y cuáles llevan treinta años en la misma línea?</p></section>';
+
+  /* 2 */
+  var deudaPares=ORDEN.filter(function(c){return PAISES[c].deuda;}).map(function(c){
+    return {nombre:PAISES[c].nombre, valor:PAISES[c].deuda[2], etiqueta:n1(PAISES[c].deuda[2])+" %",
+      color:(c==="COL"?"var(--col)":"var(--accent)")};
+  }).sort(function(a,b){return b.valor-a.valor;});
+
+  o+='<section class="step"><span class="stepnum">Trampa 02</span><h2>Deuda</h2>'+
+    cadena([
+      "El servicio de la deuda externa absorbe una parte grande de lo que el país gana exportando",
+      "Queda menos presupuesto para salud, educación e infraestructura",
+      "La economía crece menos y resiste peor los choques, como ocurrió con la pandemia",
+      "Los acreedores perciben más riesgo y cobran intereses más altos",
+      "El servicio de la deuda sube otra vez"
+    ])+
+    '<div class="figs">'+
+      '<div class="fig"><span class="k">Servicio de deuda externa en 2023</span><span class="v sm">1,4 billones US$</span><span class="s">Récord pagado por los países en desarrollo. Los intereses subieron casi un tercio, hasta 406.000 millones, el nivel más alto en veinte años.</span></div>'+
+      '<div class="fig"><span class="k">Deuda externa acumulada</span><span class="v sm">11,4 billones US$</span><span class="s">En 2023, cuadruplicada en dos décadas.</span></div>'+
+      '<div class="fig"><span class="k">Países menos adelantados sin recuperar</span><span class="v">18 de 35</span><span class="s">No habían vuelto a su nivel de desarrollo humano de 2019. Los 38 países de la OCDE sí lo superaron.</span></div>'+
+    '</div>'+
+    '<p class="fuente">Banco Mundial, International Debt Report 2024, comunicado del 3 de diciembre de 2024. En los países más pobres los intereses llegaron a 34.600 millones de dólares y presionaron los presupuestos de salud, educación y ambiente. UNCTAD, nota del 17 de marzo de 2025, que resume el mecanismo así: los países pueden no entrar en cesación de pagos de su deuda, pero sí entran en cesación de pagos de su desarrollo. PNUD, Informe sobre Desarrollo Humano 2023/2024, comunicado del 12 de marzo de 2024, que señala que la tendencia de dos décadas de reducción de desigualdades entre países ricos y pobres se invirtió.</p>'+
+    '<figure>'+barras(deudaPares,{alt:"Servicio de la deuda externa como porcentaje de las exportaciones en 2024"})+
+    '<figcaption>Servicio de la deuda externa como porcentaje de las exportaciones de bienes, servicios e ingreso primario, 2024. Serie DT.TDS.DECT.EX.ZS. Corea del Sur no aparece porque, siendo país de ingreso alto, ya no reporta a este sistema.</figcaption></figure>'+
+    '<p class="ask">De cada 100 dólares que Colombia gana exportando, 43 se van en pagar deuda externa. ¿Qué queda por fuera del presupuesto cuando esa cifra sube?</p></section>';
+
+  /* 3 */
+  var primPares=ORDEN.map(function(c){
+    var v=primTotal(c);
+    return {nombre:PAISES[c].nombre, valor:v, etiqueta:n1(v)+" %",
+      color:(c==="COL"?"var(--col)":v>=UMBRAL_PRIM?"var(--warn)":"var(--accent)")};
+  }).sort(function(a,b){return b.valor-a.valor;});
+
+  o+='<section class="step"><span class="stepnum">Trampa 03</span><h2>Dependencia de commodities</h2>'+
+    cadena([
+      "El país exporta sobre todo productos primarios, unos pocos y sin transformar",
+      "Sus ingresos suben y bajan con el precio internacional, que no controla",
+      "Con ingresos que no se pueden prever, no se planea inversión de largo plazo",
+      "No se diversifica la matriz productiva",
+      "El país sigue dependiendo de los mismos productos"
+    ])+
+    '<div class="figs">'+
+      '<div class="fig"><span class="k">Economías dependientes</span><span class="v">95 de 143</span><span class="s">Economías en desarrollo dependientes de commodities en 2021-2023, incluidos más del 80 % de los países menos adelantados.</span></div>'+
+      '<div class="fig"><span class="k">Umbral de la definición</span><span class="v">60 %</span><span class="s">Un país es dependiente cuando los productos primarios superan el 60 % de sus exportaciones de mercancías.</span></div>'+
+    '</div>'+
+    '<p class="fuente">UNCTAD (2025). The State of Commodity Dependence 2025. La UNCTAD advierte además que la transición energética puede abrir oportunidades y a la vez crear trampas nuevas, si el auge de los minerales críticos reproduce patrones extractivos.</p>'+
+    '<figure>'+barras(primPares,{umbral:UMBRAL_PRIM, umbralTexto:"60 %", alt:"Exportaciones primarias como porcentaje de las exportaciones de mercancías en 2024"})+
+    '<figcaption>Suma de alimentos, materias primas agrícolas, combustibles, y minerales y metales, como porcentaje de las exportaciones de mercancías, 2024. Series TX.VAL.FOOD, TX.VAL.AGRI, TX.VAL.FUEL y TX.VAL.MMTL del Banco Mundial. La línea marca el umbral de la UNCTAD.</figcaption></figure>'+
+    '<p class="ask">En este indicador Colombia queda del mismo lado de la línea que Malaui, y del lado contrario en casi todos los demás. ¿Qué dice eso de la estructura exportadora del país?</p></section>';
+
+  /* 4 */
+  o+='<section class="step"><span class="stepnum">Trampa 04</span><h2>Capacidad institucional</h2>'+
+    cadena([
+      "Se copia la forma de una institución que funcionó en otro país, una ley, un ministerio, un programa",
+      "La capacidad que sostenía esa institución en el país de origen no se copia, porque no está escrita en ninguna parte",
+      "La institución existe en el papel y no ejecuta",
+      "Se concluye que faltó voluntad política o presupuesto",
+      "Se copia otra institución de otro país"
+    ])+
+    '<div class="panelbox"><h3>Término técnico</h3>'+
+    '<p class="note">La literatura llama a esto mimetismo isomorfo, adoptar la forma de un modelo externo sin la función. La salida propuesta es la adaptación iterativa guiada por problemas, que parte del problema local y no del modelo importado.</p></div>'+
+    '<p class="fuente">Andrews, M., Pritchett, L. y Woolcock, M. (2013). Escaping Capability Traps Through Problem Driven Iterative Adaptation. World Development, 51, 234-244.</p>'+
+    '<div class="figs"><div class="fig"><span class="k">Indicador disponible</span><span class="v sm">Ninguno</span><span class="s">Esta trampa no tiene una serie del Banco Mundial que la mida. Las otras tres sí.</span></div></div>'+
+    '<p class="note">Que no exista el indicador no significa que la trampa no exista. Significa que para verla hay que ir al caso, y no a la base de datos. Ese es el trabajo del concepto técnico del curso.</p>'+
+    '<p class="ask">La Ley 1876 de 2017 crea el servicio público de extensión agropecuaria. ¿Ese servicio existe en el municipio que usted eligió para el concepto técnico? Si existe, ¿qué hace?</p></section>';
+
+  o+='<section class="step"><span class="stepnum">Cierre del bloque</span><h2>Asignación de trampas</h2>'+
+    '<p>Vuelva a la ficha de su país y responda la última pregunta del veredicto. Tiene que nombrar la trampa y sostenerla con una cifra del panel. Si cree que su país no está en ninguna de las cuatro, también hay que sostenerlo.</p>'+
+    '<p class="ask">¿Alguna de estas cuatro trampas explica por qué un país con buena tierra, buen clima y gente trabajando la tierra puede seguir siendo pobre?</p></section>';
+
+  return o;
+}
+
+/* ---------- tablero de respuestas ---------- */
+function vistaTablero(){
+  setTimeout(cargarTablero,0);
+  return '<h1>Tablero de respuestas</h1>'+
+  '<p class="lead">Respuestas enviadas por los estudiantes desde sus celulares. Proyecte esta vista durante las presentaciones.</p>'+
+  '<button type="button" class="btn" id="btnRecargar">Actualizar</button>'+
+  '<p class="estado" id="estadoTablero">Cargando respuestas.</p>'+
+  '<div id="tabla"></div>';
+}
+
+function cargarTablero(){
+  var est=document.getElementById("estadoTablero"), cont=document.getElementById("tabla");
+  var btn=document.getElementById("btnRecargar");
+  if(!est||!cont) return;
+  if(btn) btn.onclick=function(){ est.className="estado"; est.textContent="Cargando respuestas."; cargarTablero(); };
+  if(!URL_HOJA){
+    est.className="estado err";
+    est.textContent="No hay hoja de cálculo configurada. Revise la variable URL_HOJA en el archivo.";
+    return;
+  }
+  var u=URL_HOJA+(URL_HOJA.indexOf("?")>=0?"&":"?")+"curso="+encodeURIComponent(CURSO)+
+        "&sesion="+encodeURIComponent(SESION)+"&actividad="+encodeURIComponent(ACTIVIDAD);
+  fetch(u,{method:"GET"})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d.ok) throw new Error(d.error||"respuesta inválida");
+      pintarTablero(d.filas||[], est, cont);
+    })
+    .catch(function(err){
+      est.className="estado err";
+      est.textContent="No se pudieron leer las respuestas. "+String(err.message||err);
+      cont.innerHTML="";
+    });
+}
+
+function pintarTablero(filas, est, cont){
+  var CAMPOS=[["mundo","Mundo"],["distancia","Distancia"],["trampa","Trampa"],["explicacion","Explicación"]];
+  var envios={}, orden=[];
+  filas.forEach(function(f){
+    var clave=f.estudiante+"||"+f.grupo;
+    if(!envios[clave]){ envios[clave]={estudiante:f.estudiante, grupo:f.grupo, t:f.marca_temporal, d:{}}; orden.push(clave); }
+    if(f.marca_temporal>envios[clave].t) envios[clave].t=f.marca_temporal;
+    envios[clave].d[f.pregunta]=f.respuesta;
+  });
+  if(!orden.length){
+    est.className="estado";
+    est.textContent="Sin respuestas todavía.";
+    cont.innerHTML='<p class="vacio">Las respuestas aparecen aquí cuando los estudiantes envían su veredicto.</p>';
+    return;
+  }
+  est.className="estado ok";
+  est.textContent=orden.length+(orden.length===1?" respuesta recibida.":" respuestas recibidas.");
+  var cuerpo=orden.map(function(k){
+    var e=envios[k];
+    return '<tr><td>'+esc(e.estudiante)+'</td><td>'+esc(e.grupo)+'</td>'+
+      CAMPOS.map(function(c){return '<td>'+esc(e.d[c[0]]||"—")+'</td>';}).join("")+'</tr>';
+  }).join("");
+  cont.innerHTML='<div class="scroll"><table><thead><tr><th>Estudiante</th><th>País</th>'+
+    CAMPOS.map(function(c){return '<th>'+c[1]+'</th>';}).join("")+
+    '</tr></thead><tbody>'+cuerpo+'</tbody></table></div>'+
+    '<p class="note">La columna Explicación trae la frase que escribió cada estudiante. La columna Trampa se llena después del bloque común.</p>';
+}
+
+function vistaComparacion(){
+  var filas=ORDEN.map(function(c){
+    var P=PAISES[c];
+    return '<tr'+(c==="COL"?' class="is-col"':'')+'><td>'+P.nombre+'</td><td>'+n1(P.empleo[8])+'</td><td>'+n1(P.agri[8])+
+      '</td><td>'+n1(P.empleo[8]/P.agri[8])+'</td><td>'+n0(P.vat[2])+'</td><td>'+n1(primTotal(c))+
+      '</td><td>'+(P.deuda?n1(P.deuda[2]):"sin dato")+'</td><td>'+n1(ratioEEUU(c,0))+'</td><td>'+n1(ratioEEUU(c,8))+
+      '</td><td>'+mundo(c)+'</td></tr>';
+  }).join("");
+  var pares=ORDEN.map(function(c){
+    var d=ratioEEUU(c,8)-ratioEEUU(c,0);
+    return {nombre:PAISES[c].nombre, valor:Math.abs(d), etiqueta:(d>=0?"+":"−")+n1(Math.abs(d))+" pts",
+      color:(c==="COL"?"var(--col)":d>3?"var(--ok)":d<-3?"var(--warn)":"var(--accent)")};
+  });
+  return '<h1>Comparación de los siete países</h1>'+
+  '<p class="lead">Vista para proyectar mientras cada estudiante presenta su país. La fila resaltada es Colombia.</p>'+
+  '<div class="scroll"><table><thead><tr><th>País</th><th>Empleo agrí.<br>% 2024</th><th>Agri. en PIB<br>% 2024</th>'+
+  '<th>Brecha<br>razón</th><th>Valor por<br>trabajador</th><th>Export. prim.<br>% 2024</th><th>Servicio deuda<br>% export.</th>'+
+  '<th>% EE. UU.<br>1991</th><th>% EE. UU.<br>2024</th><th>Mundo</th></tr></thead><tbody>'+filas+'</tbody></table></div>'+
+  '<p class="note">Brecha: puntos de empleo agrícola por cada punto de participación de la agricultura en el PIB. Valor por trabajador en dólares constantes de 2015. Exportaciones primarias: suma de alimentos, materias primas agrícolas, combustibles, y minerales y metales. Cálculos propios sobre series del Banco Mundial.</p>'+
+  '<h2>Distancia recortada entre 1991 y 2024</h2>'+
+  '<figure>'+barras(pares,{alt:"Puntos porcentuales ganados o perdidos frente al ingreso por habitante de Estados Unidos"})+
+  '<figcaption>Puntos porcentuales ganados o perdidos en la relación con el ingreso por habitante de Estados Unidos. Verde, se acercó. Naranja, se alejó. Ocre, Colombia.</figcaption></figure>'+
+  '<p class="note">Corea del Sur y China recortaron distancia. Brasil, México y Malaui la perdieron. Colombia terminó donde empezó.</p>';
+}
+
+/* ---------- montaje ---------- */
+var actual="inicio";
+
+function pintarChips(){
+  var c=document.getElementById("chips");
+  var items=[["inicio","Inicio"]].concat(ORDEN.map(function(k){return [k,PAISES[k].nombre];}))
+    .concat([["trampas","Trampas"],["comp","Comparación"]]);
+  if(URL_HOJA) items.push(["tablero","Tablero"]);
+  c.innerHTML=items.map(function(it){
+    return '<button type="button" class="chip'+(it[0]==="COL"?" is-col":"")+'" data-k="'+it[0]+'" aria-pressed="'+(it[0]===actual)+'">'+it[1]+'</button>';
+  }).join("");
+  Array.prototype.forEach.call(c.querySelectorAll(".chip"),function(b){
+    b.addEventListener("click",function(){ir(b.getAttribute("data-k"));});
+  });
+}
+
+function ir(k){
+  actual=k;
+  document.getElementById("view").innerHTML =
+    k==="inicio" ? vistaInicio() : k==="comp" ? vistaComparacion() :
+    k==="trampas" ? vistaTrampas() : k==="tablero" ? vistaTablero() : vistaPais(k);
+  Array.prototype.forEach.call(document.querySelectorAll(".chip"),function(b){
+    b.setAttribute("aria-pressed", String(b.getAttribute("data-k")===k));
+  });
+  if(PAISES[k]) montarVeredicto(k);
+  window.scrollTo(0,0);
+}
+
+function val(n){var el=document.querySelector('input[name="'+n+'"]:checked'); return el?el.value:"";}
+
+function montarVeredicto(cod){
+  var sal=document.getElementById("salida"), ta=document.getElementById("v4");
+  if(!sal||!ta) return;
+  restaurar(cod);
+  function pintar(){
+    var f=ta.value.trim(), t=val("v5");
+    sal.textContent = PAISES[cod].nombre+" está en el mundo "+val("v1")+". Entre 1991 y 2024 "+val("v2")+
+      (cod==="COL" ? ". Su indicador más crítico es " : ". Lo que más lo separa de Colombia es ")+val("v3")+
+      (f ? ", y eso se explica porque "+f.replace(/\.+$/,"")+"." : ".")+
+      (t ? (t==="ninguna de las cuatro" ? " No está en ninguna de las cuatro trampas." : " Está en "+t+".") : "");
+    guardar(cod,f);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="v1"],input[name="v2"],input[name="v3"],input[name="v5"]'),function(el){
+    el.addEventListener("change",pintar);
+  });
+  ta.addEventListener("input",pintar);
+  pintar();
+  montarEnvio(cod);
+}
+
+function montarEnvio(cod){
+  var btn=document.getElementById("btnEnviar"), est=document.getElementById("estadoEnvio");
+  var campo=document.getElementById("nombre");
+  if(!btn||!est||!campo) return;
+  try{ campo.value=localStorage.getItem("dr_nombre")||""; }catch(e){}
+  btn.addEventListener("click",function(){
+    var nombre=campo.value.trim();
+    if(!nombre){ est.className="estado err"; est.textContent="Escriba su nombre antes de enviar."; campo.focus(); return; }
+    try{ localStorage.setItem("dr_nombre",nombre); }catch(e){}
+    var carga={
+      curso:CURSO, sesion:SESION, actividad:ACTIVIDAD,
+      estudiante:nombre, grupo:PAISES[cod].nombre,
+      respuestas:{
+        mundo:val("v1"), distancia:val("v2"), indicador:val("v3"),
+        explicacion:document.getElementById("v4").value.trim(),
+        trampa:val("v5"),
+        texto:document.getElementById("salida").textContent
+      }
+    };
+    btn.disabled=true; est.className="estado"; est.textContent="Enviando.";
+    fetch(URL_HOJA,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(carga)})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(!d.ok) throw new Error(d.error||"error del servidor");
+        est.className="estado ok"; est.textContent="Respuestas guardadas. Puede enviar otra vez si corrige algo.";
+        btn.disabled=false;
+      })
+      .catch(function(){
+        fetch(URL_HOJA,{method:"POST",mode:"no-cors",body:new URLSearchParams({data:JSON.stringify(carga)})})
+          .then(function(){
+            est.className="estado ok"; est.textContent="Respuestas enviadas. El navegador no pudo confirmar la escritura.";
+            btn.disabled=false;
+          })
+          .catch(function(){
+            est.className="estado err"; est.textContent="No se pudo enviar. Revise la conexión y vuelva a intentar.";
+            btn.disabled=false;
+          });
+      });
+  });
+}
+
+function guardar(cod,frase){
+  try{ localStorage.setItem("dr5001462s4_"+cod, JSON.stringify({v1:val("v1"),v2:val("v2"),v3:val("v3"),v4:frase,v5:val("v5")})); }catch(e){}
+}
+function restaurar(cod){
+  try{
+    var raw=localStorage.getItem("dr5001462s4_"+cod);
+    if(!raw) return;
+    var d=JSON.parse(raw);
+    ["v1","v2","v3","v5"].forEach(function(n){
+      if(!d[n]) return;
+      var el=document.querySelector('input[name="'+n+'"][value="'+d[n]+'"]');
+      if(el) el.checked=true;
+    });
+    if(d.v4) document.getElementById("v4").value=d.v4;
+  }catch(e){}
+}
+
+pintarChips();
+ir("inicio");
+</script>
+
+</body>
+</html>
