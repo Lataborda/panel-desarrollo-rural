@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fincas pequeñas y acceso al mercado</title>
+<meta name="description" content="Taller de la sesión 5 del curso Desarrollo Rural, Universidad Nacional de Colombia, Sede Palmira.">
+<link rel="stylesheet" href="estilos.css">
+<link rel="modulepreload" href="config.js">
+<link rel="modulepreload" href="datos.js">
+<link rel="modulepreload" href="calculos.js">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+
+<header class="cabecera">
+  <div class="contenedor">
+    <div class="cabecera-fila">
+      <p class="marca">Desarrollo Rural · Sesión 5</p>
+      <p class="indicador" id="indicador" role="status" aria-live="polite"></p>
+    </div>
+    <nav aria-label="Avance del taller">
+      <ol class="avance" id="avance"></ol>
+    </nav>
+    <p class="avance-texto" id="avance-texto"></p>
+  </div>
+</header>
+
+<main class="contenedor" id="vista" tabindex="-1">
+  <p id="mensaje-carga">Cargando el taller.</p>
+</main>
+
+<footer class="pie">
+  <div class="contenedor" id="reinicio"></div>
+</footer>
+
+<script nomodule>
+  document.getElementById('mensaje-carga').textContent =
+    'Este navegador no puede abrir el taller. Abra la página en Chrome, Safari o Firefox actualizados.';
+</script>
+</body>
+</html>
