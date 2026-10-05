@@ -59,8 +59,10 @@ const nombreHogar = (id) => {
 
 /* ---------- Lectura ---------- */
 
+// No se envía la fecha: el filtro por fecha de la primera versión del script descartaba todas las filas.
+// La página trae las filas de la sesión y filtra el día en ultimasFilas().
 function urlLectura(extra = {}) {
-  const parametros = new URLSearchParams({ curso: CURSO, sesion: SESION, actividad: ACTIVIDAD, fecha: campoFecha.value, ...extra });
+  const parametros = new URLSearchParams({ curso: CURSO, sesion: SESION, actividad: ACTIVIDAD, ...extra });
   return URL_APPS_SCRIPT + (URL_APPS_SCRIPT.includes('?') ? '&' : '?') + parametros.toString();
 }
 

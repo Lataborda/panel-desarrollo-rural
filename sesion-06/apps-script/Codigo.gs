@@ -60,9 +60,9 @@ function doGet(e) {
       var fila = {};
       COLUMNAS.forEach(function (c, i) {
         var x = v[i];
-        fila[c] = x instanceof Date ? x.toISOString() : x;
+        fila[c] = esFecha(x) ? new Date(x.getTime()).toISOString() : x;
       });
-      fila._dia = v[0] instanceof Date ? Utilities.formatDate(v[0], ZONA_HORARIA, 'yyyy-MM-dd') : '';
+      fila._dia = esFecha(v[0]) ? Utilities.formatDate(new Date(v[0].getTime()), ZONA_HORARIA, 'yyyy-MM-dd') : '';
       return fila;
     }).filter(function (f) {
       return (!p.curso || String(f.curso) === String(p.curso))
@@ -112,6 +112,11 @@ function pestanaRegistros() {
     hoja.setFrozenRows(1);
   }
   return hoja;
+}
+
+// Las fechas que devuelve la hoja no siempre pasan la prueba instanceof Date. Esta sí las reconoce.
+function esFecha(x) {
+  return Object.prototype.toString.call(x) === '[object Date]' && !isNaN(x.getTime());
 }
 
 // Los números quedan como números. El texto lleva un apóstrofo al inicio: la hoja lo guarda como texto,
