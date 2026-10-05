@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Resumen del taller de la sesión 6</title>
+<link rel="stylesheet" href="estilos.css">
+<link rel="modulepreload" href="config.js">
+<link rel="modulepreload" href="datos.js">
+<link rel="modulepreload" href="calculos.js">
+<script type="module" src="resumen.js"></script>
+</head>
+<body class="resumen">
+
+<main class="contenedor">
+  <p class="antetitulo">Desarrollo Rural 5001462 · Sesión 6</p>
+  <h1>Medios de vida rurales. Resumen de respuestas</h1>
+
+  <div class="controles">
+    <div>
+      <label for="fecha">Fecha</label>
+      <input type="date" id="fecha">
+    </div>
+    <button type="button" class="boton" id="actualizar">Actualizar</button>
+  </div>
+  <p class="estado-carga" id="estado" role="status" aria-live="polite">Cargando respuestas.</p>
+
+  <div class="pestanas" id="pestanas" role="tablist" aria-label="Partes del taller"></div>
+  <section class="panel" id="panel" role="tabpanel" tabindex="0"></section>
+</main>
+
+<script nomodule>
+  document.getElementById('estado').textContent =
+    'Este navegador no puede abrir el resumen. Use Chrome, Safari o Firefox actualizados.';
+</script>
+</body>
+</html>
